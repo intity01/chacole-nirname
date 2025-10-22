@@ -7,16 +7,19 @@ let currentCallbacks = null;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const RECONNECT_DELAY = 2000; // 2 seconds
 
-// Get WebSocket URL based on environment
+// Get WebSocket URL for the room
 const getWebSocketURL = (roomId) => {
-  // Use window.location to determine environment
-  const isProduction = !window.location.hostname.includes('localhost');
-  
-  if (isProduction) {
-    return `wss://chacole-backend.onrender.com/ws/${roomId}`;
+  // Check if running on localhost
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return `ws://localhost:8000/ws/${roomId}`;
   }
   
-  return `ws://localhost:8000/ws/${roomId}`;
+  // Production environment - always use Render.com backend
+  return `wss://chacole-backend.onrender.com/ws/${roomId}`;
+  
+  // Production: use same host with port 8000
+  const port = import.meta?.env?.VITE_API_PORT || '8000';
+  return `${protocol}//${host}:${port}/ws/${roomId}`;
 };
 
 const connect = (roomId, callbacks) => {
