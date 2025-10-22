@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"chacole-frontend": "link:/workspaces/chacole-nirname/frontend"
+	}
+}

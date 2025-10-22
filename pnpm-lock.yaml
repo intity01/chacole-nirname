@@ -1,0 +1,13 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      chacole-frontend:
+        specifier: link:/workspaces/chacole-nirname/frontend
+        version: link:frontend

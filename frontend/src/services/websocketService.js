@@ -9,29 +9,13 @@ const RECONNECT_DELAY = 2000; // 2 seconds
 
 // Get WebSocket URL from environment or construct from current location
 const getWebSocketURL = (roomId) => {
-  const wsUrl = import.meta?.env?.VITE_WS_URL;
-  if (wsUrl) {
-    return `${wsUrl}/ws/${roomId}`;
+  // Always use environment variable in production
+  if (import.meta?.env?.PROD) {
+    return `wss://chacole-backend.onrender.com/ws/${roomId}`;
   }
   
-  // Auto-detect based on current location
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = window.location.hostname;
-  
-  // If running on localhost
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return `ws://localhost:8000/ws/${roomId}`;
-  }
-  
-  // If running on Manus VM domain, replace port
-  if (host.includes('manusvm.computer') || host.includes('manus-asia.computer')) {
-    const wsHost = host.replace('5173-', '8000-');
-    return `${protocol}//${wsHost}/ws/${roomId}`;
-  }
-  
-  // Production: use same host with port 8000
-  const port = import.meta?.env?.VITE_API_PORT || '8000';
-  return `${protocol}//${host}:${port}/ws/${roomId}`;
+  // Development environment
+  return `ws://localhost:8000/ws/${roomId}`;
 };
 
 const connect = (roomId, callbacks) => {

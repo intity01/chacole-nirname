@@ -1,24 +1,13 @@
 // src/services/apiService.js
 
-// Allow overriding API URL via Vite env (VITE_API_URL).
-// Auto-detect if running on public domain
+// Get API URL based on environment
 const getApiUrl = () => {
-  // Check if VITE_API_URL is set
-  if (import.meta?.env?.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  // Always use production URL in production
+  if (import.meta?.env?.PROD) {
+    return 'https://chacole-backend.onrender.com';
   }
   
-  // Auto-detect based on current hostname
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  
-  // If running on Manus VM domain, use the backend port URL
-  if (hostname.includes('manusvm.computer') || hostname.includes('manus-asia.computer')) {
-    const port = window.location.port || '5173';
-    return `${protocol}//${hostname.replace('5173-', '8000-')}`;
-  }
-  
-  // Default to localhost
+  // Development environment
   return 'http://localhost:8000';
 };
 
