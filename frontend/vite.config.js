@@ -20,8 +20,9 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 5173,
-    strictPort: true,
+    host: '0.0.0.0',
+    port: process.env.PORT || 5173,
+    strictPort: false,
   },
   build: {
     outDir: 'dist',
