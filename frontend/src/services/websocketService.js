@@ -4,20 +4,43 @@ let ws = null;
 let reconnectAttempts = 0;
 let currentRoomId = null;
 let currentCallbacks = null;
-const MAX_RECONNECT_ATTEMPTS = 3;
+const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 2000; // 2 seconds
+const PING_INTERVAL = 30000; // 30 seconds
+let pingIntervalId = null;
 
-// Get WebSocket URL for the room
-const BACKEND_URL = 'chacole-backend.onrender.com';
-
+// Get WebSocket URL from environment or use default
 const getWebSocketURL = (roomId) => {
   // Check if running on localhost
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `ws://localhost:8000/ws/${roomId}`;
+    const wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+    return `${wsUrl}/ws/${roomId}`;
   }
   
-  // Production environment - always use Render.com backend
-  return `wss://${BACKEND_URL}/ws/${roomId}`;
+  // Production environment - use environment variable or fallback
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'chacole-backend.onrender.com';
+  return `wss://${backendUrl}/ws/${roomId}`;
+};
+
+// Send ping to keep connection alive
+const startPingInterval = () => {
+  if (pingIntervalId) {
+    clearInterval(pingIntervalId);
+  }
+  
+  pingIntervalId = setInterval(() => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      console.log('📡 Sending ping to keep connection alive');
+      sendMessage({ type: 'ping' });
+    }
+  }, PING_INTERVAL);
+};
+
+const stopPingInterval = () => {
+  if (pingIntervalId) {
+    clearInterval(pingIntervalId);
+    pingIntervalId = null;
+  }
 };
 
 const connect = (roomId, callbacks) => {
@@ -28,6 +51,7 @@ const connect = (roomId, callbacks) => {
   // ปิด WebSocket เดิมก่อน (ถ้ามี)
   if (ws && ws.readyState !== WebSocket.CLOSED) {
     console.log('Closing existing WebSocket connection...');
+    stopPingInterval();
     ws.close();
     ws = null;
   }
@@ -41,6 +65,8 @@ const connect = (roomId, callbacks) => {
     ws.onopen = () => {
       console.log('✅ WebSocket connected successfully');
       reconnectAttempts = 0; // reset counter on successful connection
+      startPingInterval(); // Start sending pings
+      
       if (callbacks.onOpen) {
         callbacks.onOpen();
       }
@@ -50,6 +76,13 @@ const connect = (roomId, callbacks) => {
       try {
         const data = JSON.parse(event.data);
         console.log('📨 WebSocket message received:', data);
+        
+        // Handle pong response
+        if (data.type === 'pong') {
+          console.log('📡 Received pong from server');
+          return;
+        }
+        
         if (callbacks.onMessage) {
           callbacks.onMessage(data);
         }
@@ -65,6 +98,7 @@ const connect = (roomId, callbacks) => {
         wasClean: event.wasClean
       });
       
+      stopPingInterval();
       ws = null;
       
       // ถ้าปิดแบบไม่ปกติ และยังไม่ถึงจำนวนครั้งสูงสุด ให้ลองเชื่อมต่อใหม่
@@ -113,6 +147,8 @@ const sendMessage = (message) => {
 const disconnect = () => {
   console.log('🔌 Disconnecting WebSocket...');
   reconnectAttempts = MAX_RECONNECT_ATTEMPTS; // ป้องกันไม่ให้ reconnect
+  stopPingInterval();
+  
   if (ws) {
     ws.close();
     ws = null;

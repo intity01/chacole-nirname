@@ -90,6 +90,11 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
             
             message_type = message_data.get("type")
             
+            # Handle ping/pong for keeping connection alive
+            if message_type == "ping":
+                await websocket.send_text(json.dumps({"type": "pong"}))
+                continue
+            
             if message_type == "message":
                 # สร้างข้อความ
                 chat_message = {
