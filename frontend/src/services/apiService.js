@@ -1,13 +1,16 @@
 // src/services/apiService.js
 
+// Allow overriding API URL via Vite env (VITE_API_URL).
+// Auto-detect if running on public domain
 // Get API URL based on environment
 const getApiUrl = () => {
-  // Always use production URL in production
-  if (import.meta?.env?.PROD) {
+  // Use window.location to determine environment
+  const isProduction = !window.location.hostname.includes('localhost');
+  
+  if (isProduction) {
     return 'https://chacole-backend.onrender.com';
   }
   
-  // Development environment
   return 'http://localhost:8000';
 };
 

@@ -7,14 +7,15 @@ let currentCallbacks = null;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const RECONNECT_DELAY = 2000; // 2 seconds
 
-// Get WebSocket URL from environment or construct from current location
+// Get WebSocket URL based on environment
 const getWebSocketURL = (roomId) => {
-  // Always use environment variable in production
-  if (import.meta?.env?.PROD) {
+  // Use window.location to determine environment
+  const isProduction = !window.location.hostname.includes('localhost');
+  
+  if (isProduction) {
     return `wss://chacole-backend.onrender.com/ws/${roomId}`;
   }
   
-  // Development environment
   return `ws://localhost:8000/ws/${roomId}`;
 };
 
