@@ -1,5 +1,8 @@
 // src/services/apiService.js
 
+// Backend URL configuration
+const BACKEND_URL = 'chacole-backend.onrender.com';
+
 // Get API URL based on environment
 const getApiUrl = () => {
   // Check if running on localhost
@@ -8,7 +11,7 @@ const getApiUrl = () => {
   }
   
   // Production environment - always use Render.com backend
-  return 'https://chacole-backend.onrender.com';
+  return `https://${BACKEND_URL}`;
 };
 
 const API_URL = getApiUrl();
