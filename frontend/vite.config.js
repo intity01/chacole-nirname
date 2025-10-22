@@ -11,23 +11,32 @@ export default defineConfig({
     },
   },
   server: {
-    host: true, // Listen on all addresses
+    host: true,
     port: 5173,
     strictPort: true,
     hmr: {
       protocol: 'wss',
       clientPort: 443,
     },
-    allowedHosts: [
-      '.manus-asia.computer',
-      '.manusvm.computer',
-      'localhost',
-    ],
   },
   preview: {
-    host: '0.0.0.0',
     port: 5173,
     strictPort: true,
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+        },
+      },
+    },
+  },
+  define: {
+    'process.env.NODE_ENV': '"production"',
+    'import.meta.env.PROD': 'true',
   },
 })
 
