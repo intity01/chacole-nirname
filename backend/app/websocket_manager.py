@@ -13,7 +13,6 @@ async def broadcast_to_room(room_id: str, message: dict, exclude_connection: str
         return
     
     participants = active_rooms[room_id]["participants"]
-    disconnected_connections = []
     
     for participant in participants:
         if participant["id"] == exclude_connection:
@@ -24,13 +23,9 @@ async def broadcast_to_room(room_id: str, message: dict, exclude_connection: str
             try:
                 await connection.send_text(json.dumps(message))
             except:
-                # การเชื่อมต่อขาด - เก็บไว้เพื่อลบทีหลัง
-                disconnected_connections.append(participant["id"])
-    
-    # ลบการเชื่อมต่อที่ขาด
-    for conn_id in disconnected_connections:
-        if conn_id in active_connections:
-            del active_connections[conn_id]
+                # ปล่อยให้ WebSocketDisconnect ใน api_router.py จัดการการขาดการเชื่อมต่ออย่างเป็นทางการ
+                # การจัดการในส่วนนี้อาจทำให้เกิด race condition และไม่สมบูรณ์
+                pass
 
 async def broadcast_typing(room_id: str, user_name: str, is_typing: bool, exclude_connection: str = None):
     """ส่งสถานะการพิมพ์ไปยังผู้ใช้อื่นในห้อง"""

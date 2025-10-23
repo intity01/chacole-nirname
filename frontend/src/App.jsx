@@ -36,8 +36,8 @@ function App() {
       console.log('Auto-joining room from URL:', roomParam);
       handleJoinRoom(roomParam.trim().toUpperCase());
       
-      // ไม่ลบ parameter ออกจาก URL เพื่อให้ auto-join ทำงานได้
-      // window.history.replaceState({}, document.title, window.location.pathname);
+      // ลบ parameter ออกจาก URL เพื่อป้องกันการเชื่อมต่อซ้ำเมื่อรีเฟรช
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
